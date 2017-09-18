@@ -1,7 +1,7 @@
 ![scrollToolBarView.gif](http://upload-images.jianshu.io/upload_images/4185621-24aec367acb951dc.gif?imageMogr2/auto-orient/strip)
 
 
->工具类的地址： https://github.com/LiPengYue/PYScrollToolBarView 这是老版demo，有问题，写完再传，需要完成demo的请留言
+>![关注简书](http://www.jianshu.com/p/880d5e7969ca)
 #一、简介
 这个工具写了很久，一直不满意，换了n种方法，最后毛瑟顿开，用最平常的知识解决了问题。所以很简单，但很巧妙。
 > 1. 适用结构： 
