@@ -28,19 +28,20 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
             self.layoutIfNeeded()
         }
     }
-   
+    
     ///是否分页
     var isBottomScrollViewPagingEnabled: Bool {
         willSet{//
             self.bottomScrollView.isPagingEnabled = newValue
         }
     }
-   
+    
+    
     ///是否有tabBar
-    var isHaveTabBar: Bool {
-        willSet(newValue){
+    var isHaveTabBar: Bool = true{
+        didSet{
             self.kIsSetFrame = true
-            if newValue {
+            if isHaveTabBar {
                 tabBarH = 49
             }else{
                 tabBarH = 0
@@ -61,15 +62,14 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
     
     ///当左右滚动bottomScrollView的时候调用,这个监听的是底部的scrollView的偏移量
     func scrollingBottomScrollViewCallBackFunc(_ scrollingBottomScrollViewCallBack: @escaping(_ contentOffset: CGPoint) -> Swift.Void){
-     self.scrollingBottomScrollViewCallBack = scrollingBottomScrollViewCallBack
+        self.scrollingBottomScrollViewCallBack = scrollingBottomScrollViewCallBack
     }
-   
     
     ///当顶部的view向上偏移的时候调用，监控了view的偏移量
     func scrollingTopViewCallBackFunc(_ scrollingTopViewCallBack: @escaping (_ contentOffset: CGPoint)->()) {
         self.scrollingTopViewCallBack = scrollingTopViewCallBack
     }
-  
+    
     
     
     private var scrollingBottomScrollViewCallBack: ((_ contentOffset: CGPoint)->())?
@@ -101,16 +101,15 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
     
     
     
-    
-    
     //MARK: ----------------- init --------------------
-    init(frame: CGRect,toolBarView: PYToolBarView, topView: UIView?, bottomViewArray: [UIView], topViewH: CGFloat, toolBarViewH: CGFloat, toolBarViewMargin: CGFloat) {
+    
+    init(frame: CGRect,toolBarView: PYToolBarView, topView: UIView?, bottomViewArray: [UIView], topViewH: CGFloat, toolBarViewH: CGFloat, toolBarViewMargin: CGFloat, isHaveTabBar: Bool) {
         self.isBottomScrollViewPagingEnabled = true
-        self.isHaveTabBar = true
         self.newValue = CGPoint(x: 0, y: 0)
         
         super.init(frame: frame)
-        
+        self.isHaveTabBar = isHaveTabBar
+        tabBarH = isHaveTabBar ? 49 : 0
         //添加子控件
         self.midToolBarView = toolBarView
         self.addSubview(self.midToolBarView)
@@ -135,7 +134,7 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-
+    
     //MARK: ------------------- layoutSubviews --------------------
     override func layoutSubviews() {
         //如果常用值没值 那么就赋值 并且设置了self.contentSize
@@ -145,10 +144,10 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
         if self.kIsSetFrame {
             //topVIew布局
             self.setupTopView()
-           
+            
             //toolBarView布局
             self.setupMidToolBarView()
-           
+            
             //bottomScrollView布局 方法内部//对subView进行了布局
             self.setupBottomScrollView()
             self.kIsSetFrame = false
@@ -184,7 +183,7 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
         //点击事件的回调 注意循环引用问题
         self.midToolBarView.clickOptionCallBackFunc { [weak self] (button, title, index) in
             self?.bottomScrollView.contentOffset = CGPoint(x:CGFloat(index)
-             * (self?.kToolBarScrollViewW)!, y: 0)
+                * (self?.kToolBarScrollViewW)!, y: 0)
             
             self?.changedPageNumberCallBack?(index,title,button)
         }
@@ -224,33 +223,30 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
             if view is UIScrollView {
                 let scrollView: UIScrollView = view as! UIScrollView
                 scrollView.addObserver(self, forKeyPath: "contentOffset", options: .new, context: nil)
-//                self.panGestureRecognizer.require(toFail: scrollView.panGestureRecognizer)
+                self.panGestureRecognizer.require(toFail: scrollView.panGestureRecognizer)
             }
         }
     }
-
+    
     ///通知的移除
     deinit {
-        self.removeObserver(self, forKeyPath: "contentOffset")
+        for view in bottomViewArray {
+            if view is UIScrollView {
+                view.removeObserver(self, forKeyPath: "contentOffset")
+            }
+        }
     }
     
     ///通知的方法
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "contentOffset" {
             
-            print(change?[NSKeyValueChangeKey.newKey] ?? "----- 没有纸")
-            
             let scrollView: UIScrollView = object as! UIScrollView
-            
             
             //获取偏移量
             let newValue: CGPoint = change?[NSKeyValueChangeKey.newKey] as! CGPoint
             self.newValue = newValue;
             
-            
-            
-        
-
             //改变scrollView偏移的位置
             if scrollView.contentOffset.y <= 0{
                 if newValue.y < 0 {
@@ -268,78 +264,49 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
                 self.contentOffset = CGPoint(x: 0, y: self.kTopViewH)
             }
             
-////            
-//            if newValue.y > self.kTopViewH {
-//                //                self.contentOffset = CGPoint(x: 0, y: self.kTopViewH)
-//                self.offset = 0
-//                self.animaOffet(CGPoint(x: 0, y: self.kTopViewH), scrollView)
-//            }
-//            
-//            if newValue.y < 0 {
-//                //                self.contentOffset = CGPoint(x: 0, y: 0)
-//                self.offset = 0
-//                self.animaOffet(CGPoint(x: 0, y: 0), scrollView)
-//            }
+            //            let isScrollBottom = Int(scrollView.contentSize.height - self.contentOffset.y) <= Int(scrollView.frame.size.height);
             
+            if scrollView.contentSize.height <= scrollView.frame.size.height + kTopViewH {
+                
+                let insertY = scrollView.frame.size.height + kTopViewH - scrollView.contentSize.height
+                
+                scrollView.contentInset = UIEdgeInsetsMake(0, 0, insertY, 0)
+            }else{
+                scrollView.contentInset = UIEdgeInsetsMake(0, 0, 0, 0)
+            }
             
             self.contentOffset = CGPoint(x: 0, y: newValue.y + self.offset)
         }
     }
     
-    func animaOffet(_ offset: CGPoint, _ scrollView: UIScrollView) ->() {
-        self.offset = 0
-        let velocity: CGPoint = scrollView.panGestureRecognizer.velocity(in: self)
-        let time: CGFloat = scrollView.contentOffset.y / velocity.y
-        UIView.animate(withDuration: TimeInterval(0.2), animations: {
-            self.contentOffset = offset
-        })
-    }
-    
     internal func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView.tag == bottomScrollViewTag {
             //拿到滚动的下标
-            print("-----",scrollView.contentOffset)
+            //            print("-----",scrollView.contentOffset)
             let index = round(scrollView.contentOffset.x / self.frame.size.width)
             //滚动时候回调
             self.scrollingBottomScrollViewCallBack?(scrollView.contentOffset)
-
+            
             //滚动到页码变了才调用
             if NSInteger(index) != self.midToolBarView.selectOptionIndex {
                 //判断是否超出了数组的取值范围
                 if index < 0 || NSInteger(index) >= self.bottomViewArray.count  {
                     return
                 }
-              
+                
                 self.midToolBarView.selectOptionIndex = NSInteger(index)
                 if self.bottomViewArray[NSInteger(self.midToolBarView.selectOptionIndex)] is UIScrollView {
                     let scroView: UIScrollView = self.bottomViewArray[NSInteger(self.midToolBarView.selectOptionIndex)] as! UIScrollView
                     self.offset = self.contentOffset.y - scroView.contentOffset.y
                 }
-                
-//                for view in self.bottomViewArray {
-//                    if view is UIScrollView {
-//                        let scrollView = view as! UIScrollView
-//                        scrollView.contentOffset = self.contentOffset
-//                    }
-//                }
             }
         }
-
+        
         if scrollView == self {
             if self.contentOffset.y > kTopViewH {
                 self.contentOffset = CGPoint(x: 0, y: self.kTopViewH)
             }
         }
     }
-//    func getScrollView(_ index: NSInteger) ->(UIScrollView) {
-//        if index >= self.bottomViewArray.count {
-//            print("数组越界了，pyToolBarScrollView，方法： getScrollView")
-//        }
-//        if self.bottomViewArray[index] is UIScrollView {
-//            let scrollView: UIScrollView = self.bottomViewArray[index] as! UIScrollView
-//            return scrollView;
-//        }
-//        return nil
-//    }
 }
 

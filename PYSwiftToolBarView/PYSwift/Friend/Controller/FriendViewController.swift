@@ -41,7 +41,7 @@ class FriendViewController: UIViewController {
         topView.backgroundColor = #colorLiteral(red: 0.7422643802, green: 0.8729702831, blue: 1, alpha: 1)
         
         
-        let toolBarView: PYToolBarScrollView = PYToolBarScrollView.init(frame: viewFrame, toolBarView: pytoolBarView, topView: topView, bottomViewArray: scrollViewArray, topViewH: 200, toolBarViewH: 30, toolBarViewMargin: 10)
+        let toolBarView: PYToolBarScrollView = PYToolBarScrollView.init(frame: viewFrame, toolBarView: pytoolBarView, topView: topView, bottomViewArray: scrollViewArray, topViewH: 200, toolBarViewH: 30, toolBarViewMargin: 10, isHaveTabBar: true)
         toolBarView.isBottomScrollViewPagingEnabled = true
         self.view.addSubview(toolBarView)
         toolBarView.changedPageNumberCallBackFunc{ (index, title, button) in

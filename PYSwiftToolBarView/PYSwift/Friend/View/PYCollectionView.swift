@@ -35,7 +35,7 @@ class PYCollectionView: UICollectionView,UICollectionViewDelegate,UICollectionVi
 
 extension PYCollectionView {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 40
+        return 15
     }
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell: UICollectionViewCell = collectionView.dequeueReusableCell(withReuseIdentifier: PYCollectionView.CELLID, for: indexPath)
