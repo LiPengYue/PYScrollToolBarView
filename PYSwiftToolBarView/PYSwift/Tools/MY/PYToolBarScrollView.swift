@@ -72,6 +72,7 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
     
     
     
+    
     private var scrollingBottomScrollViewCallBack: ((_ contentOffset: CGPoint)->())?
     private var changedPageNumberCallBack: ((_ index: NSInteger, _ title: String, _ button: UIButton)->())?
     private var scrollingTopViewCallBack: ((_ contentOffset: CGPoint)->())?
