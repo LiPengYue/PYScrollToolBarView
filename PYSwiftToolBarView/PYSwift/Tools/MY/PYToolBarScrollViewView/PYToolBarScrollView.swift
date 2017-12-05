@@ -255,8 +255,6 @@ class PYToolBarScrollView: UIScrollView,UIScrollViewDelegate {
         self.midToolBarView.clickOptionCallBackFunc { [weak self] (button, title, index) in
             self?.bottomScrollView.contentOffset = CGPoint(x:CGFloat(index)
                 * (self?.kToolBarScrollViewW)!, y: 0)
-            
-            self?.changedPageNumberCallBack?(index,title,button)
         }
         
         if self.midView != nil {
