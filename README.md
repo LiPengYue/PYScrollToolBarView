@@ -1,7 +1,9 @@
 ![scrollToolBarView.gif](http://upload-images.jianshu.io/upload_images/4185621-24aec367acb951dc.gif?imageMogr2/auto-orient/strip)
+![屏幕快照 2017-11-15 下午7.24.49.png](http://upload-images.jianshu.io/upload_images/4185621-1da9b7026b691fb6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-
->![关注简书](http://www.jianshu.com/p/880d5e7969ca)
+>[OC: 工具类下载 ](https://github.com/LiPengYue/PYToolBarScrollToolView_OCPOD)
+ pod 'PYToolBarScrollView'
+[swift：工具下载](https://github.com/LiPengYue/PYScrollToolBarView)
 #一、简介
 这个工具写了很久，一直不满意，换了n种方法，最后毛瑟顿开，用最平常的知识解决了问题。所以很简单，但很巧妙。
 > 1. 适用结构： 
@@ -128,3 +130,36 @@
             self.contentOffset = CGPoint(x: 0, y: newValue.y + self.offset)
         }
 ````
+
+
+---
+#更新：2017.11.15
+**1. PYMidView的扩展**
+
+>1. 对中间的toolBarView的扩展性，进行了修复。添加了一个PYMidView(继承自UIView)，他有个代理属性，`var delegate: PYToolBarViewProtocol?`要求实现一个方法，返回对应的toolBarView,
+>2. 事实上，你只要继承PYMidView，然后在里面布局子控件，并且，把代理属性设置成自己，实现代理方法，就可以完美适应任何产品需求。
+
+***代码**
+```
+import UIKit
+class PYMidView: UIView {
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    var delegate: PYToolBarViewProtocol?
+    private var isFirstSetToolBarUI: Bool = true
+    
+    override func layoutSubviews() {
+        if isFirstSetToolBarUI {
+            self.delegate?.registerToolBarView().displayUI()
+            layoutIfNeeded()
+            isFirstSetToolBarUI = false
+        }
+    }
+}
+
+```
+
